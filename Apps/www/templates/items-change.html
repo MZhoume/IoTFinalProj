@@ -1,0 +1,34 @@
+<ion-view view-title="{{item.name}}">
+  <ion-content class="padding">
+    <div class="list">
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper">
+          <input type="text" placeholder="Humidity" ng-model="humidity">
+        </label>
+        <button class="button button-small" ng-click="submitHumidity(humidity)" >
+          Submit
+        </button>
+      </div>
+
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper">
+          <input type="text" placeholder="Temperature" ng-model="temperature">
+        </label>
+        <button class="button button-small" ng-click="submitTemperature(temperature)" >
+          Submit
+        </button>
+      </div>
+
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper">
+          <input type="text" placeholder="Price" ng-model="price" >
+        </label>
+        <button class="button button-small" ng-click="submitPrice(price)" >
+          Submit
+        </button>
+      </div>
+    </div>
+
+    <h2 ng-show="hasError">{{error}}</h2>
+  </ion-content>
+</ion-view>
