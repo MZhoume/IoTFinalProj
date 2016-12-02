@@ -5,3 +5,7 @@ hooks
 resources
 lib
 typings
+bin
+obj
+
+.DS_Store
