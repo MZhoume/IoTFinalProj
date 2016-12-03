@@ -21,12 +21,19 @@ namespace Backend
 
             Get["/info"] = _ =>
             {
-                return Response.AsJson(_manager.Query<Item>(@"SELECT * FROM Items"));
+                return Response.AsJson(_manager.Query<ItemId>(@"SELECT * FROM ItemIds")
+                                       .Select(i =>
+                                       {
+                                           var item = _manager.Query<Item>(@"SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1", new { Id = i.Id }).FirstOrDefault();
+                                           item.Name = i.Name;
+                                           return item;
+                                       }));
             };
 
             Get["/info/{id}"] = _ =>
             {
-                return Response.AsJson(_manager.Query<Item>(@"SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1", new { Id = _.id }));
+                return Response.AsJson(_manager.Query<Item>(@"SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1",
+                                                            new { Id = _.id }));
             };
 
             Get["/info/{id}/add"] = _ =>
@@ -43,7 +50,7 @@ namespace Backend
             {
                 // TODO: adjust humidity of id
                 var humidity = Request.Query.h;
-                return $"adjusting... {_.id} to {humidity}";
+                return $"adjusting... {_.id} to {double.Parse(humidity)}";
             };
 
             // CANT DO NOW
@@ -55,7 +62,7 @@ namespace Backend
             Get["/price/{id}"] = _ =>
             {
                 var price = _manager.Query<Item>(@"SELECT Price FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1",
-                                            new { Id = _.id }).First().Price;
+                                            new { Id = _.id }).FirstOrDefault().Price;
                 return price == null ? "null" : price.ToString();
             };
 
@@ -68,6 +75,7 @@ namespace Backend
 
             Get["/plan"] = _ =>
             {
+                // TODO: find a way to predict the stocking plan
                 return "this is a stocking plan...";
             };
 

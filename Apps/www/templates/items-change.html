@@ -3,32 +3,33 @@
     <div class="list">
       <div class="item item-input-inset">
         <label class="item-input-wrapper">
-          <input type="text" placeholder="Humidity" ng-model="humidity">
+          <input type="text" placeholder="Humidity" ng-model="item.humidity">
         </label>
-        <button class="button button-small" ng-click="submitHumidity(humidity)" >
+        <button class="button button-small" ng-click="submitHumidity(item.humidity)" >
           Submit
         </button>
       </div>
 
       <div class="item item-input-inset">
         <label class="item-input-wrapper">
-          <input type="text" placeholder="Temperature" ng-model="temperature">
+          <input type="text" placeholder="Temperature" ng-model="item.temperature">
         </label>
-        <button class="button button-small" ng-click="submitTemperature(temperature)" >
+        <button class="button button-small" ng-click="submitTemperature(item.temperature)" >
           Submit
         </button>
       </div>
 
       <div class="item item-input-inset">
         <label class="item-input-wrapper">
-          <input type="text" placeholder="Price" ng-model="price" >
+          <input type="text" placeholder="Price" ng-model="item.price" >
         </label>
-        <button class="button button-small" ng-click="submitPrice(price)" >
+        <button class="button button-small" ng-click="submitPrice(item.price)" >
           Submit
         </button>
       </div>
     </div>
 
+    <h2 ng-show="hasResult">{{result}}</h2>
     <h2 ng-show="hasError">{{error}}</h2>
   </ion-content>
 </ion-view>

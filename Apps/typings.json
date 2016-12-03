@@ -5,5 +5,8 @@
     "cordova/plugins/filesystem": "registry:dt/cordova/plugins/filesystem#0.0.0+20160823215534",
     "ionic": "registry:dt/ionic#0.0.0+20160907111202",
     "jquery": "registry:dt/jquery#1.10.0+20160908203239"
+  },
+  "globalDevDependencies": {
+    "lodash": "registry:dt/lodash#4.14.0+20161110215204"
   }
 }

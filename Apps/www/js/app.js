@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'app.controllers', 'app.services'])
+angular.module('app', ['ionic', 'app.controllers', 'app.services'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -62,7 +62,7 @@ angular.module('starter', ['ionic', 'app.controllers', 'app.services'])
     .state('tab.items-change', {
       url: '/items/:id',
       views: {
-        'tab-chats': {
+        'tab-items': {
           templateUrl: 'templates/items-change.html',
           controller: 'ItemsChangeCtrl'
         }
@@ -72,7 +72,7 @@ angular.module('starter', ['ionic', 'app.controllers', 'app.services'])
   .state('tab.misc', {
     url: '/misc',
     views: {
-      'tab-account': {
+      'tab-misc': {
         templateUrl: 'templates/tab-misc.html',
         controller: 'MiscCtrl'
       }

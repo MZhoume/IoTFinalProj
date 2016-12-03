@@ -9,6 +9,12 @@ namespace Backend.Models
             set;
         }
 
+        public string Name
+        {
+            get;
+            set;
+        }
+
         public double? Weight
         {
             get;

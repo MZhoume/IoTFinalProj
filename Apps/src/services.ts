@@ -9,10 +9,12 @@ interface ICallback {
 class StorageService {
     lastItems: IItem[];
     items: IItem[];
+
+    isManager: boolean = true;
 }
 
 class HttpService {
-    private _urlBase = '';
+    private _urlBase = 'http://0.0.0.0:5000';
 
     static $inject = ['$http'];
     constructor(

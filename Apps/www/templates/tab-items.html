@@ -1,9 +1,9 @@
-<ion-view view-title="Chats">
+<ion-view view-title="Items">
   <ion-content>
     <div ng-repeat="i in items" class="card">
       <div class="item item-divider item-button-right">
         {{i.name}}
-        <a class="button" ng-show="isManager" ng-href="/items/{{i.id}}" >
+        <a class="button" ng-show="isManager" ng-href="#/tab/items/{{i.itemId}}" >
           <i class="icon ion-edit"></i>
         </a>
       </div>

@@ -2,7 +2,7 @@
 /// <reference path="./services.ts" />
 
 interface IItem {
-    id: number;
+    itemId: number;
     name: string;
     weight: number;
     humidity: number;
@@ -29,6 +29,8 @@ class WelcomeCtrl {
 interface IItemsScope extends angular.IScope {
     items: IItem[];
 
+    isManager: boolean;
+
     hasError: boolean;
     error: string;
 }
@@ -40,6 +42,7 @@ class ItemsCtrl {
         private _httpSvc: HttpService,
         private _storageSvc: StorageService
     ) {
+        _scope.isManager = _storageSvc.isManager;
         this.getItems();
     }
 
@@ -69,6 +72,9 @@ interface IItemsChangeScope extends angular.IScope {
     submitTemperature(temperature: number): void;
     submitPrice(price: number): void;
 
+    hasResult: boolean;
+    result: string;
+
     hasError: boolean;
     error: string;
 }
@@ -77,19 +83,23 @@ class ItemsChangeCtrl {
     static $inject = ['$scope', '$stateParams', 'HttpService', 'StorageService'];
     constructor(
         private _scope: IItemsChangeScope,
-        private _params: { id: number },
+        private _params: { id: string },
         private _httpSvc: HttpService,
         private _storageSvc: StorageService
     ) {
-        _scope.item = _storageSvc.items[_params.id];
+        _scope.item = _.find(_storageSvc.items, (i) => i.itemId === Number.parseInt(_params.id));
 
         _scope.submitHumidity = (humidity) => {
-            this._httpSvc.get('/adjust/' + _params.id.toString() + '/humidity?v=' + humidity.toString(),
+            this._httpSvc.get('/adjust/' + _params.id.toString() + '/humidity?h=' + humidity.toString(),
                 {
                     onSuccess: (c, d) => {
+                        this._scope.hasError = false;
+                        this._scope.hasResult = true;
+                        this._scope.result = d;
                     },
 
                     onError: (c, d) => {
+                        this._scope.hasResult = false;
                         this._scope.hasError = true;
                         this._scope.error = d;
                     }
@@ -97,12 +107,16 @@ class ItemsChangeCtrl {
         };
 
         _scope.submitTemperature = (temperature) => {
-            this._httpSvc.get('/adjust/' + _params.id.toString() + '/temperature?v=' + temperature.toString(),
+            this._httpSvc.get('/adjust/' + _params.id.toString() + '/temperature?t=' + temperature.toString(),
                 {
                     onSuccess: (c, d) => {
+                        this._scope.hasError = false;
+                        this._scope.hasResult = true;
+                        this._scope.result = d;
                     },
 
                     onError: (c, d) => {
+                        this._scope.hasResult = false;
                         this._scope.hasError = true;
                         this._scope.error = d;
                     }
@@ -110,12 +124,16 @@ class ItemsChangeCtrl {
         };
 
         _scope.submitPrice = (price) => {
-            this._httpSvc.get('/price/' + _params.id.toString() + '/set?v=' + price.toString(),
+            this._httpSvc.get('/price/' + _params.id.toString() + '/set?p=' + price.toString(),
                 {
                     onSuccess: (c, d) => {
+                        this._scope.hasError = false;
+                        this._scope.hasResult = true;
+                        this._scope.result = d;
                     },
 
                     onError: (c, d) => {
+                        this._scope.hasResult = false;
                         this._scope.hasError = true;
                         this._scope.error = d;
                     }
@@ -125,14 +143,24 @@ class ItemsChangeCtrl {
 }
 
 interface IMiscScope extends angular.IScope {
-
+    misc: string;
 }
 
 class MiscCtrl {
-    static $inject = ['$scope'];
+    static $inject = ['$scope', 'HttpService'];
     constructor (
-        private _scope: IMiscScope
-    ) {}
+        private _scope: IMiscScope,
+        private _httpSvc: HttpService
+    ) {
+        _httpSvc.get('/plan', {
+            onSuccess: (c, d) => {
+                _scope.misc = d;
+            },
+            onError: (c, d) => {
+                _scope.misc = d;
+            }
+        })
+    }
 }
 
 angular.module('app.controllers', [])
