@@ -73,7 +73,7 @@ var ItemsCtrl = (function () {
         });
         setTimeout(function () {
             _this.getItems();
-        }, 1000);
+        }, 3000);
     };
     ItemsCtrl.$inject = ['$scope', 'HttpService', 'StorageService'];
     return ItemsCtrl;
@@ -85,7 +85,7 @@ var ItemsChangeCtrl = (function () {
         this._params = _params;
         this._httpSvc = _httpSvc;
         this._storageSvc = _storageSvc;
-        _scope.item = _.find(_storageSvc.items, function (i) { return i.itemId === Number.parseInt(_params.id); });
+        _scope.item = _.find(_storageSvc.items, function (i) { return i.id === Number(_params.id); });
         _scope.submitHumidity = function (humidity) {
             _this._httpSvc.get('/adjust/' + _params.id.toString() + '/humidity?h=' + humidity.toString(), {
                 onSuccess: function (c, d) {
@@ -116,6 +116,20 @@ var ItemsChangeCtrl = (function () {
         };
         _scope.submitPrice = function (price) {
             _this._httpSvc.get('/price/' + _params.id.toString() + '/set?p=' + price.toString(), {
+                onSuccess: function (c, d) {
+                    _this._scope.hasError = false;
+                    _this._scope.hasResult = true;
+                    _this._scope.result = d;
+                },
+                onError: function (c, d) {
+                    _this._scope.hasResult = false;
+                    _this._scope.hasError = true;
+                    _this._scope.error = d;
+                }
+            });
+        };
+        _scope.refillItem = function () {
+            _this._httpSvc.get('/refill/' + _params.id.toString(), {
                 onSuccess: function (c, d) {
                     _this._scope.hasError = false;
                     _this._scope.hasResult = true;

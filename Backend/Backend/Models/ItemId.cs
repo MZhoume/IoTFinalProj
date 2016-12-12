@@ -14,5 +14,29 @@ namespace Backend.Models
             get;
             set;
         }
+
+        public double PriceThreshold
+        {
+            get;
+            set;
+        }
+
+        public double FullPrice
+        {
+            get;
+            set;
+        }
+
+        public int DaysInStock
+        {
+            get;
+            set;
+        }
+
+        public int DaysAlive
+        {
+            get;
+            set;
+        }
     }
 }

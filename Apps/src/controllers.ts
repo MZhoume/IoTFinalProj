@@ -2,7 +2,7 @@
 /// <reference path="./services.ts" />
 
 interface IItem {
-    itemId: number;
+    id: number;
     name: string;
     weight: number;
     humidity: number;
@@ -62,7 +62,7 @@ class ItemsCtrl {
         });
         setTimeout(() => {
             this.getItems();
-        }, 1000);
+        }, 3000);
     }
 }
 
@@ -71,6 +71,7 @@ interface IItemsChangeScope extends angular.IScope {
     submitHumidity(humidity: number): void;
     submitTemperature(temperature: number): void;
     submitPrice(price: number): void;
+    refillItem(): void;
 
     hasResult: boolean;
     result: string;
@@ -87,7 +88,7 @@ class ItemsChangeCtrl {
         private _httpSvc: HttpService,
         private _storageSvc: StorageService
     ) {
-        _scope.item = _.find(_storageSvc.items, (i) => i.itemId === Number.parseInt(_params.id));
+        _scope.item = _.find(_storageSvc.items, (i) => i.id === Number(_params.id));
 
         _scope.submitHumidity = (humidity) => {
             this._httpSvc.get('/adjust/' + _params.id.toString() + '/humidity?h=' + humidity.toString(),
@@ -125,6 +126,23 @@ class ItemsChangeCtrl {
 
         _scope.submitPrice = (price) => {
             this._httpSvc.get('/price/' + _params.id.toString() + '/set?p=' + price.toString(),
+                {
+                    onSuccess: (c, d) => {
+                        this._scope.hasError = false;
+                        this._scope.hasResult = true;
+                        this._scope.result = d;
+                    },
+
+                    onError: (c, d) => {
+                        this._scope.hasResult = false;
+                        this._scope.hasError = true;
+                        this._scope.error = d;
+                    }
+                });
+        };
+
+        _scope.refillItem = () => {
+            this._httpSvc.get('/refill/' + _params.id.toString(),
                 {
                     onSuccess: (c, d) => {
                         this._scope.hasError = false;
