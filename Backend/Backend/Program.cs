@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using Backend.Services;
 using Backend.Helpers;
-using DapperExtensions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,9 +16,8 @@ namespace Backend
         static DBManager _manager;
         static ISensors _sensor;
 
-        // TODO: get the pump and fan id for each items
         static int[] fanId = { 5, 6 };
-        static int[] pumpId = { 3, 4 };
+        static int[] pumpId = { 14, 15 };
 
         public MainClass()
         {
@@ -32,33 +30,28 @@ namespace Backend
             Get["/info"] = _ =>
             {
                 return Response.AsJson(
-                    _manager.GetList<ItemId>(null)
-                    .Select(itemId =>
+                    _manager.Query<ItemId>("SELECT * FROM ItemIds").Select(id =>
+                    {
+                        var item = _manager.Query<Item>("SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1", new { Id = id.Id }).FirstOrDefault();
+                        return new
                         {
-                            var item = _manager.GetList<Item>(Predicates.Field<Item>(i => i.ItemId, Operator.Eq, itemId.Id))
-                                               .OrderBy(i => i.RowId)
-                                               .LastOrDefault();
-                            return new
-                            {
-                                itemId.Name,
-                                itemId.Id,
-                                item.Weight,
-                                item.Temperature,
-                                item.Humidity,
-                                item.Price,
-                                itemId.MinWeight,
-                                itemId.PriceThreshold
-                            };
-                        })
+                            id.Name,
+                            id.Id,
+                            item.Weight,
+                            item.Temperature,
+                            item.Humidity,
+                            item.Price,
+                            id.MinWeight,
+                            id.PriceThreshold
+                        };
+                    })
                 );
             };
 
             Get["/info/{id}"] = _ =>
             {
                 var id = (int)int.Parse(_.id);
-                var item = _manager.GetList<Item>(Predicates.Field<Item>(i => i.ItemId, Operator.Eq, id))
-                        .OrderBy(i => i.RowId)
-                        .LastOrDefault();
+                var item = _manager.Query<Item>("SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1", new { Id = id }).FirstOrDefault();
                 return Response.AsJson(
                     new
                     {
@@ -84,6 +77,7 @@ namespace Backend
             {
                 var humidity = (double)double.Parse(Request.Query.h);
                 var id = (int)int.Parse(_.id);
+                Console.WriteLine("Starting new humidity thread...");
                 Task.Factory.StartNew(() =>
                 {
                     id -= 1;
@@ -99,21 +93,36 @@ namespace Backend
                         readouts = _sensor.GetSensorData()[id];
                     }
                 });
-                return $"adjusting... {_.id} to {humidity}";
+                return $"adjusting... humidity of {_.id} to {humidity}";
             };
 
             Get["/adjust/{id}/temperature"] = _ =>
             {
                 var temperature = (double)double.Parse(Request.Query.t);
-                return $"adjusting... {_.id} to {temperature}";
+                var id = (int)int.Parse(_.id);
+                Console.WriteLine("Starting new temperature thread...");
+                Task.Factory.StartNew(() =>
+                {
+                    id -= 1;
+                    var readouts = _sensor.GetSensorData()[id];
+                    while (readouts.Temperature < temperature)
+                    {
+                        _sensor.RelayOn(fanId[id]);
+                        _sensor.RelayOn(pumpId[id]);
+                        Thread.Sleep(1000);
+                        _sensor.RelayOff(fanId[id]);
+                        _sensor.RelayOff(pumpId[id]);
+                        Thread.Sleep(1000);
+                        readouts = _sensor.GetSensorData()[id];
+                    }
+                });
+                return $"adjusting... temperature of {_.id} to {temperature}";
             };
 
             Get["/price/{id}"] = _ =>
             {
                 var id = (int)int.Parse(_.id);
-                return _manager.GetList<Item>(Predicates.Field<Item>(i => i.ItemId, Operator.Eq, id))
-                        .OrderBy(i => i.RowId)
-                        .LastOrDefault().Price.ToString();
+                return _manager.Query<Item>("SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1", new { Id = id }).FirstOrDefault().Price.ToString();
             };
 
             Get["/price/{id}/set"] = _ =>
@@ -121,9 +130,7 @@ namespace Backend
                 var id = (int)int.Parse(_.id);
                 var price = (double)double.Parse(Request.Query.p);
 
-                id = _manager.GetList<Item>(Predicates.Field<Item>(i => i.ItemId, Operator.Eq, id))
-                       .OrderBy(i => i.RowId)
-                       .LastOrDefault().RowId;
+                id = _manager.Query<Item>("SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1", new { Id = id }).FirstOrDefault().RowId;
 
                 return _manager.Execute("UPDATE Items SET Price = @P WHERE rowid = @rowid", new { P = price, rowid = id }).ToString();
             };
@@ -131,7 +138,7 @@ namespace Backend
             Get["/plan"] = _ =>
             {
                 // TODO: find a way to predict the stocking plan
-                return "this is a stocking plan...";
+                return "Some stocking plan...";
             };
 
             Get["/refill/{id}"] = _ =>
@@ -147,33 +154,34 @@ namespace Backend
         public static void Main(string[] args)
         {
             _manager = ServiceLocator.GetService<DBManager>();
-            _sensor = ServiceLocator.GetService<ISensors, MockSensors>();
+            _sensor = ServiceLocator.GetService<ISensors, Sensors>();
 
             _manager.Execute("DELETE FROM Items");
-            foreach (var id in _manager.GetList<ItemId>(null))
+            foreach (var id in _manager.Query<ItemId>("SELECT * FROM ItemIds"))
             {
                 _manager.Execute("UPDATE ItemIds SET DaysInStock = 0 WHERE Id = @Id", new { Id = id.Id });
             }
 
             #region initialize
 
-            // it takes 6s to get the sensor's readouts
-            double refreshTime = 10000;
+            double refreshTime = 8000;
 
             Daemon.Create(refreshTime, (s, e) =>
             {
                 Console.WriteLine("Getting sensor data...");
                 var readouts = _sensor.GetSensorData();
 
-                if ((readouts[0].Humidity == 0
-                   && readouts[0].Temperature == 0)
-                   || (readouts[1].Humidity == 0
-                   && readouts[1].Temperature == 0))
+                if (Math.Abs(readouts[0].Humidity) < 0.01
+                    || Math.Abs(readouts[0].Temperature) < 0.01
+                    || Math.Abs(readouts[1].Humidity) < 0.01
+                    || Math.Abs(readouts[1].Temperature) < 0.01
+                   || readouts[0].Weight > 1000
+                   || readouts[1].Weight > 1000)
                     return;
 
                 for (int i = 0; i < 2; i++)
                 {
-                    var itemid = _manager.GetById<ItemId>(i + 1);
+                    var itemid = _manager.Query<ItemId>("SELECT * FROM ItemIds WHERE Id = @Id", new { Id = i + 1 }).FirstOrDefault();
                     var weight = readouts[i].Weight;
                     var humidity = readouts[i].Humidity;
                     var temperature = readouts[i].Temperature;
@@ -184,7 +192,7 @@ namespace Backend
 
             Daemon.Create(3 * refreshTime, (s, e) =>
             {
-                var itemIds = _manager.GetList<ItemId>(null);
+                var itemIds = _manager.Query<ItemId>("SELECT * FROM ItemIds");
                 foreach (var id in itemIds)
                 {
                     _manager.Execute("UPDATE ItemIds SET DaysInStock = @D WHERE Id = @Id", new { D = id.DaysInStock + 1, Id = id.Id });
@@ -193,10 +201,10 @@ namespace Backend
 
             #endregion
 
-            using (var host = new NancyHost(new Uri("http://localhost:5000")))
+            using (var host = new NancyHost(new Uri("http://localhost:80")))
             {
                 host.Start();
-                Console.WriteLine("Running... on port 5000");
+                Console.WriteLine("Running... on port 80");
                 Console.ReadLine();
             }
         }

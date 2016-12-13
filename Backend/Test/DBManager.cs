@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using Mono.Data.Sqlite;
 using Dapper;
+using Mono.Data.Sqlite;
 
-namespace Backend.Helpers
+namespace Test
 {
     public class DBManager
     {
@@ -15,7 +15,7 @@ namespace Backend.Helpers
         public IEnumerable<T> Query<T>(string sql, object param = null)
         {
             _conn.Open();
-            var result = _conn.Query<T>(sql, param);
+            var result =  _conn.Query<T>(sql, param);
             _conn.Close();
             return result;
         }

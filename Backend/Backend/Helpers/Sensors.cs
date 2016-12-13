@@ -27,6 +27,7 @@ namespace Backend.Helpers
                     CreateNoWindow = true
                 }
             };
+            proc.Start();
             proc.WaitForExit();
 
             for (int i = 0; i < 2; i++)
@@ -35,6 +36,8 @@ namespace Backend.Helpers
                 output[i].Temperature = _network.Compute(new double[] { double.Parse(info[0]) / 150.0 })[0] * 150.0;
                 output[i].Humidity = _network.Compute(new double[] { double.Parse(info[1]) / 150.0 })[0] * 150.0;
                 output[i].Weight = Math.Abs(double.Parse(info[2]));
+
+                Console.WriteLine($"Got {output[i].Weight} | {output[i].Humidity} | {output[i].Temperature}");
             }
 
             return output;

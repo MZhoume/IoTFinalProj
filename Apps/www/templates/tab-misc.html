@@ -1,9 +1,9 @@
 <ion-view view-title="Misc">
   <ion-content>
-    <h2>{{misc}}</h2>
+    <h2 ng-show="settings.isManager">{{misc}}</h2>
     <ion-list>
       <ion-toggle ng-model="settings.isManager">
-        I am Store Manager
+        I am a Store Manager
       </ion-toggle>
     </ion-list>
   </ion-content>
