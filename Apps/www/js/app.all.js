@@ -147,9 +147,11 @@ var ItemsChangeCtrl = (function () {
     return ItemsChangeCtrl;
 }());
 var MiscCtrl = (function () {
-    function MiscCtrl(_scope, _httpSvc) {
+    function MiscCtrl(_scope, _httpSvc, _storageSvc) {
         this._scope = _scope;
         this._httpSvc = _httpSvc;
+        this._storageSvc = _storageSvc;
+        _scope.settings = _storageSvc;
         _httpSvc.get('/plan', {
             onSuccess: function (c, d) {
                 _scope.misc = d;
@@ -159,7 +161,7 @@ var MiscCtrl = (function () {
             }
         });
     }
-    MiscCtrl.$inject = ['$scope', 'HttpService'];
+    MiscCtrl.$inject = ['$scope', 'HttpService', 'StorageService'];
     return MiscCtrl;
 }());
 angular.module('app.controllers', [])

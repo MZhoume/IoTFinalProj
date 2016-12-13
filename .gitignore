@@ -7,6 +7,6 @@ lib
 typings
 bin
 obj
-
+res
 .DS_Store
 packages

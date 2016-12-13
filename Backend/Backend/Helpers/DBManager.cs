@@ -34,12 +34,12 @@ namespace Backend.Helpers
             return id;
         }
 
-        public IEnumerable<T> Query<T>(string sql, object param)
+        public IEnumerable<T> Query<T>(string sql, object param = null)
         {
             return _conn.Query<T>(sql, param);
         }
 
-        public int Execute(string sql, object param)
+        public int Execute(string sql, object param = null)
         {
             return _conn.Execute(sql, param);
         }

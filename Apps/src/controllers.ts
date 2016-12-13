@@ -162,14 +162,18 @@ class ItemsChangeCtrl {
 
 interface IMiscScope extends angular.IScope {
     misc: string;
+    settings: { isManager: boolean };
 }
 
 class MiscCtrl {
-    static $inject = ['$scope', 'HttpService'];
-    constructor (
+    static $inject = ['$scope', 'HttpService', 'StorageService'];
+    constructor(
         private _scope: IMiscScope,
-        private _httpSvc: HttpService
+        private _httpSvc: HttpService,
+        private _storageSvc: StorageService
     ) {
+        _scope.settings = _storageSvc;
+
         _httpSvc.get('/plan', {
             onSuccess: (c, d) => {
                 _scope.misc = d;
@@ -177,7 +181,7 @@ class MiscCtrl {
             onError: (c, d) => {
                 _scope.misc = d;
             }
-        })
+        });
     }
 }
 

@@ -21,7 +21,7 @@ namespace Backend.Helpers
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = "HW/temphum.py",
+                    Arguments = "HW/temphumweight.py",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
@@ -34,55 +34,32 @@ namespace Backend.Helpers
                 var info = proc.StandardOutput.ReadLine().Split('|');
                 output[i].Temperature = _network.Compute(new double[] { double.Parse(info[0]) / 150.0 })[0] * 150.0;
                 output[i].Humidity = _network.Compute(new double[] { double.Parse(info[1]) / 150.0 })[0] * 150.0;
+                output[i].Weight = Math.Abs(double.Parse(info[2]));
             }
 
             return output;
         }
 
-        public void FanOn(int id)
+        public void RelayOn(int id)
         {
             new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = $"HW/relay_on.py ${id}"
+                    Arguments = $"HW/relay_on.py {id}"
                 }
             }.Start();
         }
 
-        public void FanOff(int id)
+        public void RelayOff(int id)
         {
             new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = $"HW/relay_off.py ${id}"
-                }
-            }.Start();
-        }
-
-        public void PumpOn(int id)
-        {
-            new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "python",
-                    Arguments = $"HW/pump_on.py ${id}"
-                }
-            }.Start();
-        }
-
-        public void PumpOff(int id)
-        {
-            new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "python",
-                    Arguments = $"HW/pump_off.py ${id}"
+                    Arguments = $"HW/relay_off.py {id}"
                 }
             }.Start();
         }

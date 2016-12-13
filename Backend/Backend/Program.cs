@@ -18,8 +18,8 @@ namespace Backend
         static ISensors _sensor;
 
         // TODO: get the pump and fan id for each items
-        static int[] fanId = { 1, 2 };
-        static int[] pumpId = { 1, 2 };
+        static int[] fanId = { 5, 6 };
+        static int[] pumpId = { 3, 4 };
 
         public MainClass()
         {
@@ -45,7 +45,9 @@ namespace Backend
                                 item.Weight,
                                 item.Temperature,
                                 item.Humidity,
-                                item.Price
+                                item.Price,
+                                itemId.MinWeight,
+                                itemId.PriceThreshold
                             };
                         })
                 );
@@ -88,23 +90,23 @@ namespace Backend
                     var readouts = _sensor.GetSensorData()[id];
                     while (readouts.Humidity < humidity)
                     {
-                        _sensor.FanOn(fanId[id]);
-                        _sensor.PumpOn(pumpId[id]);
-                        Thread.Sleep(100);
-                        _sensor.FanOff(fanId[id]);
-                        _sensor.PumpOff(pumpId[id]);
-                        Thread.Sleep(100);
+                        _sensor.RelayOn(fanId[id]);
+                        _sensor.RelayOn(pumpId[id]);
+                        Thread.Sleep(1000);
+                        _sensor.RelayOff(fanId[id]);
+                        _sensor.RelayOff(pumpId[id]);
+                        Thread.Sleep(1000);
                         readouts = _sensor.GetSensorData()[id];
                     }
                 });
                 return $"adjusting... {_.id} to {humidity}";
             };
 
-            // CANT DO NOW
-            //Get["/adjust/{id}/temperature"] = _ =>
-            //{
-            //    // TODO: adjust temperature of id
-            //};
+            Get["/adjust/{id}/temperature"] = _ =>
+            {
+                var temperature = (double)double.Parse(Request.Query.t);
+                return $"adjusting... {_.id} to {temperature}";
+            };
 
             Get["/price/{id}"] = _ =>
             {
@@ -147,14 +149,28 @@ namespace Backend
             _manager = ServiceLocator.GetService<DBManager>();
             _sensor = ServiceLocator.GetService<ISensors, MockSensors>();
 
+            _manager.Execute("DELETE FROM Items");
+            foreach (var id in _manager.GetList<ItemId>(null))
+            {
+                _manager.Execute("UPDATE ItemIds SET DaysInStock = 0 WHERE Id = @Id", new { Id = id.Id });
+            }
+
             #region initialize
 
+            // it takes 6s to get the sensor's readouts
             double refreshTime = 10000;
 
             Daemon.Create(refreshTime, (s, e) =>
             {
                 Console.WriteLine("Getting sensor data...");
                 var readouts = _sensor.GetSensorData();
+
+                if ((readouts[0].Humidity == 0
+                   && readouts[0].Temperature == 0)
+                   || (readouts[1].Humidity == 0
+                   && readouts[1].Temperature == 0))
+                    return;
+
                 for (int i = 0; i < 2; i++)
                 {
                     var itemid = _manager.GetById<ItemId>(i + 1);

@@ -51,6 +51,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services'])
   })
 
   .state('tab.items', {
+      cache: false,
       url: '/items',
       views: {
         'tab-items': {
@@ -60,6 +61,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services'])
       }
     })
     .state('tab.items-change', {
+      cache: false,
       url: '/items/:id',
       views: {
         'tab-items': {

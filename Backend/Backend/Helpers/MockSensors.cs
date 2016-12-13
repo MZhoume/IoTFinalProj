@@ -24,24 +24,14 @@ namespace Backend.Helpers
             };
         }
 
-        public void FanOn(int id)
+        public void RelayOn(int id)
         {
-            Console.WriteLine($"Fan on... {id}");
+            Console.WriteLine($"Relay on... {id}");
         }
 
-        public void FanOff(int id)
+        public void RelayOff(int id)
         {
-            Console.WriteLine($"Fan off... {id}");
-        }
-
-        public void PumpOn(int id)
-        {
-            Console.WriteLine($"Pump on... {id}");
-        }
-
-        public void PumpOff(int id)
-        {
-            Console.WriteLine($"Pump off... {id}");
+            Console.WriteLine($"Relay off... {id}");
         }
     }
 }

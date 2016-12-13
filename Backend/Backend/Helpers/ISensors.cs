@@ -5,12 +5,8 @@ namespace Backend.Helpers
     {
         SensorOutput[] GetSensorData();
 
-        void FanOn(int id);
+        void RelayOn(int id);
 
-        void FanOff(int id);
-
-        void PumpOn(int id);
-
-        void PumpOff(int id);
+        void RelayOff(int id);
     }
 }

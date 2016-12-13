@@ -38,5 +38,11 @@ namespace Backend.Models
             get;
             set;
         }
+
+        public double MinWeight
+        {
+            get;
+            set;
+        }
     }
 }
