@@ -130,9 +130,7 @@ namespace Backend
                 var id = (int)int.Parse(_.id);
                 var price = (double)double.Parse(Request.Query.p);
 
-                id = _manager.Query<Item>("SELECT * FROM Items WHERE ItemId = @Id ORDER BY rowid DESC LIMIT 1", new { Id = id }).FirstOrDefault().RowId;
-
-                return _manager.Execute("UPDATE Items SET Price = @P WHERE rowid = @rowid", new { P = price, rowid = id }).ToString();
+                return _manager.Execute("UPDATE Items SET Price = @P WHERE rowid = (SELECT MAX(rowid) from Items WHERE ItemId = @Id)", new { P = price, Id = id }).ToString();
             };
 
             Get["/plan"] = _ =>

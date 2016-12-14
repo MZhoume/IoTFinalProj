@@ -83,6 +83,7 @@
     <Compile Include="Helpers\SensorOutput.cs" />
     <Compile Include="Helpers\MockSensors.cs" />
     <Compile Include="Helpers\ISensors.cs" />
+    <Compile Include="Helpers\FakeSensors.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

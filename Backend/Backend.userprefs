@@ -1,7 +1,8 @@
 ﻿<Properties StartupConfiguration="{8919ACC3-26EF-4FF8-9401-6F9970E741B7}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Backend/Program.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Backend/Helpers/FakeSensors.cs">
     <Files>
-      <File FileName="Backend/Program.cs" Line="204" Column="74" />
+      <File FileName="Backend/Program.cs" Line="24" Column="54" />
+      <File FileName="Backend/Helpers/FakeSensors.cs" Line="9" Column="23" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Release|x86" />
